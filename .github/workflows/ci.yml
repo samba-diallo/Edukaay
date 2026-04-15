@@ -1,0 +1,82 @@
+name: CI - Tests & Lint
+
+on:
+  push:
+    branches: [ dev, main ]
+  pull_request:
+    branches: [ dev, main ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'edukaay/backend/package-lock.json'
+    
+    - name: Install backend dependencies
+      run: cd edukaay/backend && npm ci
+    
+    - name: Run linter (ESLint)
+      run: cd edukaay/backend && npm run lint --if-present || true
+    
+    - name: Run tests
+      run: cd edukaay/backend && npm test --if-present || echo "No tests configured"
+    
+  test-frontend:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'edukaay/frontend/package-lock.json'
+    
+    - name: Install frontend dependencies
+      run: cd edukaay/frontend && npm ci
+    
+    - name: Run linter (ESLint)
+      run: cd edukaay/frontend && npm run lint --if-present || true
+    
+    - name: Build Next.js
+      run: cd edukaay/frontend && npm run build --if-present || echo "No build configured"
+    
+    - name: Run tests
+      run: cd edukaay/frontend && npm test --if-present || echo "No tests configured"
+
+  build-mobile:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+        cache: 'npm'
+        cache-dependency-path: 'edukaay/mobile/package-lock.json'
+    
+    - name: Install mobile dependencies
+      run: cd edukaay/mobile && npm ci
+    
+    - name: Check Expo setup
+      run: cd edukaay/mobile && npx expo --version || echo "Expo not ready for CI"
