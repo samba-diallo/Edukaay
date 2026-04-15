@@ -54,3 +54,5 @@ coverage/
 .cache/
 temp/
 tmp/
+.agents/
+.claude/
