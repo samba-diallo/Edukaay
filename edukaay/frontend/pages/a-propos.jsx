@@ -166,9 +166,9 @@ export default function APropos() {
                 Distinctions
               </h3>
               <ul className="space-y-3 text-neutral-700">
-                <li>🏆 Meilleure Startup EdTech 2022 - West Africa Innovation Awards</li>
-                <li>🏆 Impact Award - UNESCO Digital Learning Initiative</li>
-                <li>🏆 Top 10 EdTech Companies - TechCrunch Africa</li>
+                <li>Meilleure Startup EdTech 2022 - West Africa Innovation Awards</li>
+                <li>Impact Award - UNESCO Digital Learning Initiative</li>
+                <li>Top 10 EdTech Companies - TechCrunch Africa</li>
               </ul>
             </div>
 
@@ -178,9 +178,9 @@ export default function APropos() {
                 Impact Social
               </h3>
               <ul className="space-y-3 text-neutral-700">
-                <li>✓ 10 000+ heures de tutorat fournies</li>
-                <li>✓ Programme de bourses pour 500+ étudiants</li>
-                <li>✓ Formation de 200+ tuteurs en méthodologie pédagogique</li>
+                <li>10 000+ heures de tutorat fournies</li>
+                <li>Programme de bourses pour 500+ etudiants</li>
+                <li>Formation de 200+ tuteurs en methodologie pedagogique</li>
               </ul>
             </div>
           </div>

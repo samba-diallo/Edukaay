@@ -14,19 +14,19 @@ require('../models/index');
 
 async function initializerDatabase() {
   try {
-    console.log('🔌 Connexion à la base de données...');
+    console.log('[DB] Connexion a la base de donnees...');
     await sequelize.authenticate();
-    console.log('✅ Connexion réussie.');
+    console.log('[DB] Connexion reussie.');
 
-    console.log('🗑️  Suppression des anciennes tables...');
-    // Force recreate tables (attention: cela supprime toutes les données!)
+    console.log('[DB] Suppression des anciennes tables...');
+    // Force recreate tables (attention: cela supprime toutes les donnees!)
     await sequelize.sync({ force: true });
-    console.log('✅ Tables créées avec succès.');
+    console.log('[DB] Tables creees avec succes.');
 
-    console.log('🎉 Base de données initialisée!');
+    console.log('[DB] Base de donnees initialisee.');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Erreur lors de l\'initialisation:', error);
+    console.error('[DB] Erreur lors de l\'initialisation:', error);
     process.exit(1);
   }
 }

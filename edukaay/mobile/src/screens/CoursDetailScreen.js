@@ -109,7 +109,7 @@ export default function CoursDetailScreen({ route }) {
                 style={[styles.ressourceBtn, styles.ressourceBtnVideo]}
                 onPress={() => ouvrirLien(cours.videoUrl)}
               >
-                <Text style={styles.ressourceBtnIcon}>▶</Text>
+                <Text style={styles.ressourceBtnIcon}>Video</Text>
                 <View>
                   <Text style={styles.ressourceBtnTitle}>Regarder la vidéo</Text>
                   <Text style={styles.ressourceBtnSous}>Ouvre dans le navigateur</Text>
@@ -126,7 +126,7 @@ export default function CoursDetailScreen({ route }) {
                 style={[styles.ressourceBtn, styles.ressourceBtnPdf]}
                 onPress={() => ouvrirLien(cours.pdfUrl)}
               >
-                <Text style={styles.ressourceBtnIcon}>📄</Text>
+                <Text style={styles.ressourceBtnIcon}>PDF</Text>
                 <View>
                   <Text style={styles.ressourceBtnTitle}>Télécharger le PDF</Text>
                   <Text style={styles.ressourceBtnSous}>Support de cours</Text>

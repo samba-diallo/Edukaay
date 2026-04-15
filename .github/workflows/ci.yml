@@ -1,82 +1,148 @@
-name: CI - Tests & Lint
+# Pipeline CI/CD EduKaay
+#
+# Declanchement : push et pull_request sur main et develop.
+#
+# Jobs :
+#   1. tests-backend    : tests unitaires Jest (bloquant)
+#   2. lint-frontend    : ESLint Next.js (non bloquant)
+#   3. verification     : structure + absence d'emojis (bloquant)
+#
+# Variables d'environnement CI requises dans GitHub Secrets :
+#   - JWT_SECRET : utilise uniquement pour les tests unitaires
+
+name: CI — Tests et Qualite
 
 on:
   push:
-    branches: [ dev, main ]
+    branches: [main, develop, dev]
   pull_request:
-    branches: [ dev, main ]
+    branches: [main, develop, dev]
 
 jobs:
-  test-backend:
+  # ---------------------------------------------------------------------------
+  # JOB 1 : Tests unitaires Backend — BLOQUANT
+  # ---------------------------------------------------------------------------
+  tests-backend:
+    name: Tests Backend (Node.js ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: 'edukaay/backend/package-lock.json'
-    
-    - name: Install backend dependencies
-      run: cd edukaay/backend && npm ci
-    
-    - name: Run linter (ESLint)
-      run: cd edukaay/backend && npm run lint --if-present || true
-    
-    - name: Run tests
-      run: cd edukaay/backend && npm test --if-present || echo "No tests configured"
-    
-  test-frontend:
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: 'edukaay/frontend/package-lock.json'
-    
-    - name: Install frontend dependencies
-      run: cd edukaay/frontend && npm ci
-    
-    - name: Run linter (ESLint)
-      run: cd edukaay/frontend && npm run lint --if-present || true
-    
-    - name: Build Next.js
-      run: cd edukaay/frontend && npm run build --if-present || echo "No build configured"
-    
-    - name: Run tests
-      run: cd edukaay/frontend && npm test --if-present || echo "No tests configured"
 
-  build-mobile:
-    runs-on: ubuntu-latest
-    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18.x
-        cache: 'npm'
-        cache-dependency-path: 'edukaay/mobile/package-lock.json'
-    
-    - name: Install mobile dependencies
-      run: cd edukaay/mobile && npm ci
-    
-    - name: Check Expo setup
-      run: cd edukaay/mobile && npx expo --version || echo "Expo not ready for CI"
+      - name: Recuperer le code source
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: edukaay/backend/package-lock.json
+
+      - name: Installer les dependances
+        working-directory: edukaay/backend
+        run: npm ci
+
+      - name: Executer les tests unitaires
+        working-directory: edukaay/backend
+        run: npm test
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'secret_jwt_ci_uniquement' }}
+
+      - name: Generer le rapport de couverture
+        working-directory: edukaay/backend
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'secret_jwt_ci_uniquement' }}
+
+      - name: Publier le rapport de couverture
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: couverture-node${{ matrix.node-version }}
+          path: edukaay/backend/coverage/
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # JOB 2 : Lint Frontend — NON BLOQUANT (erreurs signalees, pas bloquantes)
+  # ---------------------------------------------------------------------------
+  lint-frontend:
+    name: Lint Frontend (Next.js)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code source
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+          cache-dependency-path: edukaay/frontend/package-lock.json
+
+      - name: Installer les dependances
+        working-directory: edukaay/frontend
+        run: npm ci
+
+      - name: Executer ESLint
+        working-directory: edukaay/frontend
+        run: npm run lint
+        continue-on-error: true
+
+  # ---------------------------------------------------------------------------
+  # JOB 3 : Verification structure + absence d'emojis — BLOQUANT
+  # ---------------------------------------------------------------------------
+  verification:
+    name: Verification qualite du code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code source
+        uses: actions/checkout@v4
+
+      - name: Verifier les fichiers obligatoires
+        run: |
+          echo "Verification des fichiers critiques..."
+          test -f edukaay/backend/app.js            || (echo "MANQUANT: app.js" && exit 1)
+          test -f edukaay/backend/jest.config.js    || (echo "MANQUANT: jest.config.js" && exit 1)
+          test -f edukaay/backend/middleware/auth.js || (echo "MANQUANT: auth.js" && exit 1)
+          test -d edukaay/backend/tests/controllers  || (echo "MANQUANT: tests/controllers/" && exit 1)
+          test -d edukaay/backend/tests/middleware   || (echo "MANQUANT: tests/middleware/" && exit 1)
+          test -d edukaay/backend/tests/services     || (echo "MANQUANT: tests/services/" && exit 1)
+          echo "Structure validee."
+
+      - name: Verifier absence d'emojis dans le code source
+        run: |
+          python3 -c "
+          import os, re, sys
+
+          # Detecte les emojis et symboles speciaux interdits
+          emoji_pattern = re.compile(
+            r'[\U0001F300-\U0001F9FF\U00002600-\U000027BF\U0001FA00-\U0001FA9F]',
+            re.UNICODE
+          )
+
+          violations = []
+          for root, dirs, files in os.walk('edukaay'):
+            dirs[:] = [d for d in dirs if d not in ('node_modules', '.next', 'dist', 'build')]
+            for f in files:
+              if not f.endswith(('.js', '.jsx', '.ts', '.tsx')): continue
+              path = os.path.join(root, f)
+              with open(path, encoding='utf-8', errors='ignore') as fh:
+                for i, line in enumerate(fh, 1):
+                  if emoji_pattern.search(line):
+                    violations.append(f'{path}:{i}: {line.strip()[:100]}')
+
+          if violations:
+            print('ECHEC — Emojis detectes dans le code source:')
+            for v in violations:
+              print(' -', v)
+            sys.exit(1)
+          else:
+            print('OK — Aucun emoji detecte.')
+          "

@@ -92,7 +92,7 @@ async function mettreAJourStatut(req, res) {
 }
 
 /**
- * Tuteur marque la séance comme terminée → déclenche la validation famille
+ * Tuteur marque la seance comme terminee - declenche la validation famille
  * @param {Object} req - req.params.id = ID de la réservation
  * @param {Object} res
  */

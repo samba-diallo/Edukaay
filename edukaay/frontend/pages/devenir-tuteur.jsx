@@ -87,13 +87,13 @@ export default function DevenirTuteur() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium">
             <span className="flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-              ✓ Rémunération rapide (Mobile Money)
+              Remuneration rapide (Mobile Money)
             </span>
             <span className="flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-              ✓ Cours en ligne ou à domicile
+              Cours en ligne ou a domicile
             </span>
             <span className="flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-              ✓ Réponse sous 48h
+              Reponse sous 48h
             </span>
           </div>
         </div>

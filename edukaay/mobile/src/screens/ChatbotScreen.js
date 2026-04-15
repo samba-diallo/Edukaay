@@ -139,7 +139,7 @@ export default function ChatbotScreen() {
           onPress={envoyerMessage}
           disabled={!input.trim() || chargement}
         >
-          <Text style={styles.sendBtnText}>→</Text>
+          <Text style={styles.sendBtnText}>Envoyer</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

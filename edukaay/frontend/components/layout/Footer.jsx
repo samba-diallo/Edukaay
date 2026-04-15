@@ -142,7 +142,7 @@ export default function Footer() {
         {/* Message de statut */}
         <div className="mt-8 pt-6 border-t border-neutral-800">
           <p className="text-xs text-neutral-600 text-center">
-            🌍 EduKaay opère en Afrique de l&apos;Ouest | 
+            EduKaay opere en Afrique de l&apos;Ouest | 
             {' '}
             <a href="/statut" className="text-primary-400 hover:text-primary-300 underline">
               Statut des services

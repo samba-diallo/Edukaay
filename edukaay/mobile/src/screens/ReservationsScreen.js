@@ -71,7 +71,7 @@ export default function ReservationsScreen() {
   const renderSeanceAValider = ({ item }) => (
     <View style={styles.validationCard}>
       <View style={styles.validationHeader}>
-        <Text style={styles.validationIcon}>⏳</Text>
+        <Text style={styles.validationIcon}>En attente</Text>
         <Text style={styles.validationLabel}>Séance à valider</Text>
       </View>
       <Text style={styles.courseTitle}>{item.cours?.titre || 'Cours'}</Text>
@@ -85,14 +85,14 @@ export default function ReservationsScreen() {
           onPress={() => validerSeance(item.id, 'confirmee')}
           disabled={actionEnCours === item.id}
         >
-          <Text style={styles.btnConfirmerText}>✓ Confirmer</Text>
+          <Text style={styles.btnConfirmerText}>Confirmer</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.btnSignaler, actionEnCours === item.id && styles.btnDisabled]}
           onPress={() => validerSeance(item.id, 'contestee')}
           disabled={actionEnCours === item.id}
         >
-          <Text style={styles.btnsignalerText}>⚠ Signaler</Text>
+          <Text style={styles.btnsignalerText}>Signaler un probleme</Text>
         </TouchableOpacity>
       </View>
     </View>
