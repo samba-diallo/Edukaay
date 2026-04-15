@@ -1,17 +1,31 @@
 /**
- * Point d'entrée principal de l'API EduKaay
- * Configure Express, les middlewares et les routes
+ * FICHIER : app.js
+ * Objectif : Point d'entree principal de l'API EduKaay - Marketplace de tutorat en Afrique de l'Ouest
+ * 
+ * Ce fichier initialise le serveur Express et configure tous les middlewares de securite,
+ * les routes API, et les connexions en temps reel via Socket.IO pour le chat et les notifications
+ * 
+ * Les variables d'environnement doivent etre definies dans un fichier .env :
+ * - DB_NAME, DB_USER, DB_PASSWORD : Configuration PostgreSQL
+ * - JWT_SECRET : Cle pour signer les tokens JWT
+ * - FRONTEND_URL : URL du frontend pour CORS
+ * - WAVE_API_KEY, ORANGE_MONEY_SECRET, MTN_MOMO_KEY : Cles des APIs de paiement Mobile Money
  */
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const { Server } = require('socket.io');
-const http = require('http');
 
-const path = require('path');
+// Charger les variables d'environnement depuis le fichier .env
+require('dotenv').config();
+
+// Importations des bibliotheques principales
+const express = require('express');           // Framework web
+const cors = require('cors');                 // Autoriser les requetes cross-origin
+const helmet = require('helmet');             // Securiser les headers HTTP
+const morgan = require('morgan');             // Logger les requetes
+const rateLimit = require('express-rate-limit'); // Limiter le nombre de requetes
+const { Server } = require('socket.io');      // Communication bidirectionnelle temps reel
+const http = require('http');                 // Module HTTP pour Socket.IO
+const path = require('path');                 // Gerer les chemins de fichiers
+
+// Importations des routes API
 const userRoutes = require('./routes/userRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
@@ -21,9 +35,11 @@ const scholarshipRoutes = require('./routes/scholarshipRoutes');
 const recruitmentRoutes = require('./routes/recruitmentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+
+// Configuration de la base de donnees PostgreSQL via Sequelize ORM
 const { sequelize } = require('./config/database');
 
-// Charger tous les modèles et leurs associations
+// Charger les modeles (User, Course, Booking, Payment, etc.) et etablir les relations entre eux
 require('./models/index');
 
 const app = express();
