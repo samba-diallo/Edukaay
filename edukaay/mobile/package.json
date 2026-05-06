@@ -1,11 +1,13 @@
 {
   "name": "edukaay-mobile",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "App.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
-    "ios": "expo start --ios"
+    "ios": "expo start --ios",
+    "lint": "eslint . --max-warnings=9999",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "expo": "~50.0.0",
@@ -19,5 +21,12 @@
     "axios": "^1.6.2",
     "@react-native-async-storage/async-storage": "1.21.0",
     "react-native-vector-icons": "^10.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "@babel/eslint-parser": "^7.23.10",
+    "babel-preset-expo": "^10.0.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-native": "^4.1.0"
   }
 }
