@@ -1,11 +1,14 @@
 # Pipeline CI/CD EduKaay
 #
-# Declanchement : push et pull_request sur main et develop.
+# Declanchement : push et pull_request sur main, develop, dev.
 #
 # Jobs :
 #   1. tests-backend    : tests unitaires Jest (bloquant)
-#   2. lint-frontend    : ESLint Next.js (non bloquant)
-#   3. verification     : structure + absence d'emojis (bloquant)
+#   2. lint-backend     : ESLint backend (non bloquant — durci sprint par sprint)
+#   3. lint-frontend    : ESLint Next.js (non bloquant)
+#   4. lint-mobile      : ESLint mobile (non bloquant)
+#   5. format-check     : Prettier --check sur l'ensemble du repo (non bloquant)
+#   6. verification     : structure + absence d'emojis (bloquant)
 #
 # Variables d'environnement CI requises dans GitHub Secrets :
 #   - JWT_SECRET : utilise uniquement pour les tests unitaires
@@ -68,7 +71,34 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
-  # JOB 2 : Lint Frontend — NON BLOQUANT (erreurs signalees, pas bloquantes)
+  # JOB 2 : Lint Backend — NON BLOQUANT (sera durci sprint par sprint)
+  # ---------------------------------------------------------------------------
+  lint-backend:
+    name: Lint Backend (ESLint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code source
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+          cache-dependency-path: edukaay/backend/package-lock.json
+
+      - name: Installer les dependances
+        working-directory: edukaay/backend
+        run: npm ci
+
+      - name: Executer ESLint
+        working-directory: edukaay/backend
+        run: npm run lint
+        continue-on-error: true
+
+  # ---------------------------------------------------------------------------
+  # JOB 3 : Lint Frontend — NON BLOQUANT (erreurs signalees, pas bloquantes)
   # ---------------------------------------------------------------------------
   lint-frontend:
     name: Lint Frontend (Next.js)
@@ -95,7 +125,57 @@ jobs:
         continue-on-error: true
 
   # ---------------------------------------------------------------------------
-  # JOB 3 : Verification structure + absence d'emojis — BLOQUANT
+  # JOB 4 : Lint Mobile — NON BLOQUANT
+  # ---------------------------------------------------------------------------
+  lint-mobile:
+    name: Lint Mobile (React Native)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code source
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+          cache-dependency-path: edukaay/mobile/package-lock.json
+
+      - name: Installer les dependances
+        working-directory: edukaay/mobile
+        run: npm ci
+
+      - name: Executer ESLint
+        working-directory: edukaay/mobile
+        run: npm run lint
+        continue-on-error: true
+
+  # ---------------------------------------------------------------------------
+  # JOB 5 : Verification du formatage Prettier — NON BLOQUANT
+  # ---------------------------------------------------------------------------
+  format-check:
+    name: Verification formatage (Prettier)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code source
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Installer Prettier
+        run: npm install --no-save prettier@^3.2.5
+
+      - name: Verifier le formatage
+        run: npx prettier --check "edukaay/**/*.{js,jsx,ts,tsx,json,md,yml,yaml}"
+        continue-on-error: true
+
+  # ---------------------------------------------------------------------------
+  # JOB 6 : Verification structure + absence d'emojis — BLOQUANT
   # ---------------------------------------------------------------------------
   verification:
     name: Verification qualite du code

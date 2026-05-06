@@ -47,7 +47,7 @@ const Payment = sequelize.define('Payment', {
   beneficiaireId: {
     type: DataTypes.UUID,
     allowNull: false,              // Obligatoire - qui recoit l'argent ?
-    comment: 'ID du tuteur qui reçoit l'argent (table utilisateurs)',
+    comment: 'ID du tuteur qui reçoit l\'argent (table utilisateurs)',
   },
   
   // MONTANTS
