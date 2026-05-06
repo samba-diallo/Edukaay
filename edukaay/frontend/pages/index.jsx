@@ -1,189 +1,225 @@
-/**
- * Page d'accueil EduKaay
- * Présente la proposition de valeur et les fonctionnalités clés
- */
+import React, { useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { FiSearch, FiVideo, FiShield, FiDollarSign, FiPhone, FiBookOpen, FiUsers } from 'react-icons/fi';
-import HeroSearch from '../components/features/HeroSearch';
-import FeatureCard from '../components/ui/FeatureCard';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { FiSearch, FiVideo, FiShield, FiDollarSign, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
+import MagneticWrapper from '../components/ui/MagneticWrapper';
 
-const fonctionnalites = [
-  {
-    icone: <FiSearch size={32} />,
-    titre: 'Trouvez le tuteur idéal',
-    description: 'Recherchez parmi des centaines de tuteurs qualifiés, filtrés par matière, niveau et localisation.',
-  },
-  {
-    icone: <FiVideo size={32} />,
-    titre: 'Cours en ligne ou à domicile',
-    description: 'Choisissez entre des cours en visioconférence ou des séances à domicile dans votre ville.',
-  },
-  {
-    icone: <FiShield size={32} />,
-    titre: 'Tuteurs vérifiés',
-    description: 'Tous nos tuteurs sont vérifiés et évalués par la communauté pour garantir la qualité.',
-  },
-  {
-    icone: <FiDollarSign size={32} />,
-    titre: 'Paiement Mobile Money',
-    description: 'Payez facilement via Wave, Orange Money ou MTN MoMo. Simple, rapide, sécurisé.',
-  },
-];
+// On enregistre ScrollTrigger pour GSAP
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function Accueil() {
+  const heroRef = useRef(null);
+  const heroTextRef = useRef(null);
+  const philosophyRef = useRef(null);
+  const featuresRef = useRef(null);
+
+  useEffect(() => {
+    let ctx = gsap.context(() => {
+      // 1. Animation Hero (Stagger)
+      const heroElements = heroTextRef.current.children;
+      gsap.from(heroElements, {
+        y: 50,
+        opacity: 0,
+        duration: 1.2,
+        stagger: 0.15,
+        ease: 'power3.out',
+        delay: 0.2
+      });
+
+      // Parallaxe très subtil sur le fond du hero
+      gsap.to('.hero-bg', {
+        yPercent: 20,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
+
+      // 2. Animation Philosophie (Manifeste)
+      const philoLines = gsap.utils.toArray('.philo-line');
+      philoLines.forEach((line) => {
+        gsap.from(line, {
+          scrollTrigger: {
+            trigger: line,
+            start: 'top 85%',
+          },
+          y: 40,
+          opacity: 0,
+          duration: 1,
+          ease: 'power3.out'
+        });
+      });
+
+      // 3. Animation Cartes Features
+      const cards = gsap.utils.toArray('.feature-card-anim');
+      gsap.from(cards, {
+        scrollTrigger: {
+          trigger: featuresRef.current,
+          start: 'top 75%',
+        },
+        y: 50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'back.out(1.2)'
+      });
+
+    }, [heroRef, philosophyRef, featuresRef]); // Scope pour le nettoyage
+
+    return () => ctx.revert(); // Nettoyage lors du démontage
+  }, []);
+
   return (
-    <>
+    <div className="bg-neutral-50 overflow-hidden">
       <Head>
-        <title>EduKaay - Marketplace de Tutorat en Afrique</title>
-        <meta
-          name="description"
-          content="Trouvez le tuteur idéal pour réussir vos études. Cours à domicile et en ligne au Sénégal. Paiement Mobile Money."
-        />
+        <title>EduKaay | L'Élite du Tutorat en Afrique de l'Ouest</title>
+        <meta name="description" content="Trouvez le meilleur tuteur en 2 minutes. Réservation instantanée et paiement via Wave/Orange Money." />
       </Head>
 
-      {/* Section Recrutement — HAUT DE PAGE */}
-      <section className="bg-gradient-to-r from-accent-600 to-accent-500 text-white py-6 px-4">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white/20 rounded-full">
-              <FiUsers size={28} />
-            </div>
-            <div>
-              <p className="font-poppins font-bold text-lg md:text-xl">
-                Vous êtes étudiant ou diplômé ?
-              </p>
-              <p className="text-white/90 text-sm">
-                Devenez tuteur et gagnez en partageant votre savoir
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <a
-              href="tel:+221338001234"
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 transition px-4 py-2 rounded-lg font-semibold text-sm"
-            >
-              <FiPhone size={16} />
-              Appeler
-            </a>
-            <Link
-              href="/devenir-tuteur"
-              className="bg-white text-accent-700 hover:bg-white/90 font-bold px-6 py-2 rounded-lg text-sm transition-all duration-200 shadow-md"
-            >
-              Postuler maintenant
-            </Link>
-          </div>
+      {/* SECTION HERO - Cinématique (100vh) */}
+      <section ref={heroRef} className="relative h-[100svh] w-full flex flex-col justify-end pb-24 md:pb-32 px-6 lg:px-12">
+        {/* Background Image avec gradient superposé pour lisibilité */}
+        <div 
+          className="hero-bg absolute inset-0 z-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop')" }}
+        >
+          {/* Gradient overlay lourd primaire-vers-noir */}
+          <div className="absolute inset-0 bg-gradient-to-t from-primary-900 via-primary-900/80 to-primary-900/40 mix-blend-multiply"></div>
+          <div className="absolute inset-0 bg-black/30"></div>
         </div>
-      </section>
 
-      {/* Section Héro */}
-      <section className="bg-gradient-to-br from-primary to-primary-700 text-white py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-poppins text-3xl md:text-5xl font-bold mb-4">
-            Réussissez avec <span className="text-accent">EduKaay</span>
+        {/* Contenu Hero */}
+        <div ref={heroTextRef} className="relative z-10 max-w-4xl">
+          <div className="inline-block overflow-hidden mb-4">
+            <span className="block text-accent-400 font-inter tracking-widest uppercase text-sm font-semibold">
+              La Nouvelle Norme de l'Éducation
+            </span>
+          </div>
+          
+          <h1 className="text-white text-5xl md:text-7xl lg:text-8xl font-poppins leading-[1.1] tracking-tight mb-6">
+            <span className="font-medium">L'Excellence est</span><br />
+            <span className="font-bold italic text-accent-300">À portée de main.</span>
           </h1>
-          <p className="text-lg md:text-xl mb-8 font-medium bg-white text-neutral-900 px-6 py-4 rounded-xl inline-block shadow-lg">
-            La première marketplace de tutorat conçue pour l&apos;Afrique de l&apos;Ouest.
-            Trouvez votre tuteur, réservez un cours, progressez.
+          
+          <p className="text-white/80 text-lg md:text-xl font-inter max-w-2xl mb-10 leading-relaxed">
+            Trouvez un tuteur d'élite vérifié. Réservez votre cours. Payez via Mobile Money en moins de 2 minutes. Bienvenue dans la nouvelle ère du tutorat au Sénégal.
           </p>
-          <HeroSearch />
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <MagneticWrapper>
+              <Link href="/tuteurs" className="group flex items-center justify-center gap-2 bg-accent-500 hover:bg-accent-400 text-neutral-900 px-8 py-4 rounded-full font-semibold transition-all duration-300">
+                Trouver un Tuteur
+                <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </MagneticWrapper>
+            
+            <MagneticWrapper>
+              <Link href="/devenir-tuteur" className="group flex items-center justify-center gap-2 border border-white/30 hover:border-white/80 hover:bg-white/10 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm">
+                Devenir Tuteur
+              </Link>
+            </MagneticWrapper>
+          </div>
         </div>
       </section>
 
-      {/* Section Fonctionnalités */}
-      <section className="py-16 px-4">
+      {/* SECTION PHILOSOPHIE (Le Manifeste contre Jangalma) */}
+      <section ref={philosophyRef} className="py-32 px-6 lg:px-12 bg-primary-900 text-white relative">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-poppins mb-16">
+            <div className="philo-line mb-4 text-white/50 font-medium">La plupart des agences vous font attendre.</div>
+            <div className="philo-line font-bold italic text-accent-400 text-5xl md:text-7xl">Nous vous connectons en 2 minutes.</div>
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-12 mt-20">
+            <div className="philo-line">
+              <h3 className="text-2xl font-semibold mb-4 text-white">Adieu les formulaires opaques.</h3>
+              <p className="text-white/70 leading-relaxed text-lg">
+                Fini les agences où vous devez remplir un formulaire et attendre qu'on vous rappelle. Sur EduKaay, vous parcourez les profils transparents de nos tuteurs, lisez de vrais avis, et choisissez vous-même qui vous accompagnera.
+              </p>
+            </div>
+            <div className="philo-line">
+              <h3 className="text-2xl font-semibold mb-4 text-white">Intégration Mobile Money native.</h3>
+              <p className="text-white/70 leading-relaxed text-lg">
+                Pas besoin de virement bancaire complexe. Payez vos cours instantanément et en toute sécurité via Wave, Orange Money ou MTN MoMo directement depuis l'application.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION FONCTIONNALITÉS (Cartes Interactives) */}
+      <section ref={featuresRef} className="py-32 px-6 lg:px-12 bg-neutral-50 relative">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-poppins font-bold text-center mb-12">
-            Pourquoi choisir <span className="text-primary">EduKaay</span> ?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {fonctionnalites.map((f, i) => (
-              <FeatureCard key={i} icone={f.icone} titre={f.titre} description={f.description} />
-            ))}
+          <div className="text-center mb-20">
+            <span className="text-primary-600 font-semibold tracking-widest uppercase text-sm">Fonctionnalités</span>
+            <h2 className="text-4xl md:text-5xl font-poppins font-bold mt-2 text-neutral-900">Un instrument de réussite.</h2>
           </div>
-        </div>
-      </section>
 
-      {/* Section Bourses / Diaspora */}
-      <section className="bg-accent/10 py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-poppins font-bold mb-4">
-            Programme de Bourses Diaspora
-          </h2>
-          <p className="text-lg mb-8 text-neutral-700">
-            Vous êtes dans la diaspora ? Financez les cours d&apos;un étudiant défavorisé
-            et contribuez à la souveraineté éducative africaine.
-          </p>
-          <Link href="/bourses" className="btn-accent inline-block w-auto px-10">
-            Faire un don
-          </Link>
-        </div>
-      </section>
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Carte 1 */}
+            <div className="feature-card-anim bg-white p-10 rounded-[2.5rem] shadow-xl border border-neutral-100 hover:shadow-2xl transition-shadow duration-500 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 rounded-bl-[100px] -z-0 transition-transform group-hover:scale-110"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-primary-100 text-primary-600 rounded-2xl flex items-center justify-center mb-8">
+                  <FiSearch size={28} />
+                </div>
+                <h3 className="text-2xl font-bold font-poppins mb-4">Recherche chirurgicale</h3>
+                <p className="text-neutral-600 leading-relaxed mb-6">
+                  Filtrez les tuteurs par matière, niveau, ville et tarif. Trouvez la perle rare parmi des profils certifiés.
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm text-neutral-700"><FiCheckCircle className="text-accent-500" /> Profils vidéos</li>
+                  <li className="flex items-center gap-2 text-sm text-neutral-700"><FiCheckCircle className="text-accent-500" /> Diplômes vérifiés</li>
+                </ul>
+              </div>
+            </div>
 
-      {/* Section Accès rapide */}
-      <section className="py-12 px-4 bg-neutral-50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-poppins font-bold text-center mb-8">Commencer maintenant</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Link
-              href="/tuteurs"
-              className="flex items-center gap-5 p-6 bg-white rounded-2xl shadow-sm border border-neutral-200 hover:border-primary-400 hover:shadow-md transition-all duration-200 group"
-            >
-              <div className="p-4 bg-primary-50 rounded-xl text-primary-600 group-hover:bg-primary-100 transition">
-                <FiUsers size={28} />
+            {/* Carte 2 */}
+            <div className="feature-card-anim bg-white p-10 rounded-[2.5rem] shadow-xl border border-neutral-100 hover:shadow-2xl transition-shadow duration-500 relative overflow-hidden group mt-0 md:mt-12">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-accent-50 rounded-bl-[100px] -z-0 transition-transform group-hover:scale-110"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-accent-100 text-accent-600 rounded-2xl flex items-center justify-center mb-8">
+                  <FiDollarSign size={28} />
+                </div>
+                <h3 className="text-2xl font-bold font-poppins mb-4">Paiement sans friction</h3>
+                <p className="text-neutral-600 leading-relaxed mb-6">
+                  Intégration Fintech avancée. L'argent est bloqué sécuritairement jusqu'à ce que le cours soit validé.
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm text-neutral-700"><FiCheckCircle className="text-accent-500" /> Wave & Orange Money</li>
+                  <li className="flex items-center gap-2 text-sm text-neutral-700"><FiCheckCircle className="text-accent-500" /> Paiement garanti</li>
+                </ul>
               </div>
-              <div>
-                <p className="font-poppins font-bold text-lg">Trouver un tuteur</p>
-                <p className="text-neutral-500 text-sm mt-1">Cours particuliers à domicile ou en ligne</p>
-              </div>
-            </Link>
-            <Link
-              href="/cours"
-              className="flex items-center gap-5 p-6 bg-white rounded-2xl shadow-sm border border-neutral-200 hover:border-accent-400 hover:shadow-md transition-all duration-200 group"
-            >
-              <div className="p-4 bg-accent-50 rounded-xl text-accent-600 group-hover:bg-accent-100 transition">
-                <FiBookOpen size={28} />
-              </div>
-              <div>
-                <p className="font-poppins font-bold text-lg">Accéder aux cours</p>
-                <p className="text-neutral-500 text-sm mt-1">Vidéos et ressources pédagogiques</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
+            </div>
 
-      {/* Section Recrutement — BAS DE PAGE (rappel) */}
-      <section className="py-16 px-4 bg-gradient-to-br from-primary-700 to-primary-900 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <FiUsers size={16} />
-            Rejoignez notre communauté de tuteurs
-          </div>
-          <h2 className="text-2xl md:text-3xl font-poppins font-bold mb-4">
-            Partagez votre savoir, créez votre emploi
-          </h2>
-          <p className="text-lg mb-8 text-white/80 max-w-2xl mx-auto">
-            Devenez tuteur sur EduKaay. Fixez vos horaires, vos tarifs,
-            et aidez des élèves à progresser partout en Afrique de l&apos;Ouest.
-          </p>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-            <a
-              href="tel:+221338001234"
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200"
-            >
-              <FiPhone size={18} />
-              +221 33 800 12 34
-            </a>
-            <Link
-              href="/devenir-tuteur"
-              className="bg-accent-500 hover:bg-accent-400 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition-all duration-200 active:scale-95"
-            >
-              Postuler en ligne
-            </Link>
+            {/* Carte 3 */}
+            <div className="feature-card-anim bg-primary-600 p-10 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-shadow duration-500 relative overflow-hidden group mt-0 md:mt-24 text-white">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500 rounded-bl-[100px] -z-0 transition-transform group-hover:scale-110"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-primary-500 text-white rounded-2xl flex items-center justify-center mb-8">
+                  <FiShield size={28} />
+                </div>
+                <h3 className="text-2xl font-bold font-poppins mb-4">Espace sécurisé</h3>
+                <p className="text-white/80 leading-relaxed mb-6">
+                  Un tableau de bord complet pour gérer le calendrier, les devoirs, et communiquer avec le tuteur.
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm text-white"><FiCheckCircle className="text-accent-400" /> Messagerie en direct</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><FiCheckCircle className="text-accent-400" /> Suivi pédagogique</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-    </>
+      
+    </div>
   );
 }
